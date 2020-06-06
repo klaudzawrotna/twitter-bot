@@ -1,0 +1,57 @@
+import tweepy
+import time
+
+# Twitter Identification
+auth = tweepy.OAuthHandler('consumer_key', 'consumer+secret')
+auth.set_access_token('acces_token', 'access_token_secret')
+
+api = tweepy.API(auth)
+user = api.me()
+
+# Accessing Public Tweets
+public_tweets = api.home_timeline()
+for tweet in public_tweets:
+    print(tweet.text)
+
+
+def limit_handler(cursor):
+   try:
+        while True:
+            yield cursor.next()
+    except tweepy.RateLimitError:
+        time.sleep(300)
+
+
+# Searching for Tweets containing specific word and liking them
+search_string = 'python'
+numbersOfTweets = 2
+
+for tweet in tweepy.Cursor(api.search, search_string).items(numbersOfTweets):
+    try:
+        tweet.favorite()
+        print('I liked that tweet')
+    except tweepy.TweepyError as e:
+     print(e.reason)
+    except StopIteration:
+     break
+
+# Retweeting
+
+for tweet in tweepy.Cursor(api.search, search_string).items(numbersOfTweets):
+    try:
+        tweet.retweet()
+        print('I liked that tweet')
+    except tweepy.TweepyError as e:
+     print(e.reason)
+    except StopIteration:
+     break
+
+# Following Back Bot for my follower who has more than 100 followers
+
+for follower in limit_handler(tweepy.Cursor(api.followers).items()):
+    if follower.followers_count > 100 == 'NAME':
+        print(follower.name)
+        follower.follow()
+        break
+       
+       
